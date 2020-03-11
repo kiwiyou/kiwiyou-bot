@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "serverless": "^1.66.0",
+    "serverless-rust": "^0.3.7"
+  },
+  "name": "kiwiyou-bot"
+}

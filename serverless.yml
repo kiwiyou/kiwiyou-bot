@@ -1,0 +1,25 @@
+service: kiwiyou-bot
+provider:
+  name: aws
+  runtime: rust
+  memorySize: 128
+  environment:
+    BOT_TOKEN: ${ssm:/kiwiyou-bot/token~true}
+
+package:
+  individually: true
+
+plugins:
+  - serverless-rust
+
+functions:
+  kiwiyou-bot:
+    handler: kiwiyou-bot
+    events:
+      - http:
+          path: '/'
+          method: GET
+
+custom:
+  rust:
+    dockerTag: 0.2.6-rust-1.41.0
