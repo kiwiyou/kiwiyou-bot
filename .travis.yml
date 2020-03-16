@@ -75,7 +75,7 @@ after_success: |
 # for more information
 deploy:
   - provider: script
-    script: npx serverless deploy --conceal -s production
+    script: npx serverless deploy --conceal -s production | head -n -9
     skip_cleanup: true
     on:
       branch: master
