@@ -1,39 +1,53 @@
-use crate::i18n::{self, English, Language};
+use crate::i18n::{self, Text};
+use crate::MessageContext;
 use log::error;
-use std::sync::Arc;
 use teloxide::requests::{Request, SendChatActionKind};
 use teloxide::types::{Message, ParseMode};
-use teloxide::Bot;
 use teloxide::RequestError;
 
-pub async fn handle_message(bot: Arc<Bot>, message: Message) -> Result<(), RequestError> {
+pub async fn handle_message(message: Message, ctx: MessageContext) -> Result<(), RequestError> {
     if let Some(text) = message.text() {
         let without_slash = text.trim_start_matches('/');
         if without_slash.len() == text.len() {
             return Ok(());
         }
-        bot.send_chat_action(message.chat_id(), SendChatActionKind::Typing)
+        ctx.bot
+            .send_chat_action(message.chat_id(), SendChatActionKind::Typing)
             .send()
             .await?;
+        let language = ctx.language.unwrap_or_default();
         let content = match Command::parse(without_slash) {
             Ok(command) => match command {
-                Command::Help => English.equivalent_of(i18n::command::Result::Help),
+                Command::Help => i18n::command::Result::Help.to(language),
                 Command::UnicodeSearch { query } => {
                     match crate::service::unicode::lookup(query).await {
-                        Ok(result) => {
-                            English.equivalent_of(i18n::command::Result::UnicodeSearch(result))
-                        }
+                        Ok(result) => i18n::command::Result::UnicodeSearch(result).to(language),
                         Err(e) => {
                             error!("{:?} : {:?}", command, e);
-                            English.equivalent_of(i18n::command::Error::Exception)
+                            i18n::command::Error::Exception.to(language)
+                        }
+                    }
+                }
+                Command::Language { kind } => {
+                    let set_language = crate::database::set_language(message.chat_id(), kind).await;
+                    match set_language {
+                        Ok(_) => i18n::command::Result::Language {
+                            before: ctx.language,
+                            after: kind,
+                        }
+                        .to(kind),
+                        Err(e) => {
+                            error!("{:?} : {:?}", command, e);
+                            i18n::command::Error::Exception.to(language)
                         }
                     }
                 }
             },
-            Err(e) => English.equivalent_of(e),
+            Err(e) => e.to(language),
         };
 
-        bot.send_message(message.chat_id(), content)
+        ctx.bot
+            .send_message(message.chat_id(), content)
             .parse_mode(ParseMode::HTML)
             .reply_to_message_id(message.id)
             .send()
@@ -46,6 +60,7 @@ pub async fn handle_message(bot: Arc<Bot>, message: Message) -> Result<(), Reque
 enum Command<'a> {
     Help,
     UnicodeSearch { query: &'a str },
+    Language { kind: i18n::LanguageKind },
 }
 
 impl<'a> Command<'a> {
@@ -62,6 +77,14 @@ impl<'a> Command<'a> {
                     ))
                 } else {
                     Ok(Command::UnicodeSearch { query })
+                }
+            }
+            "lang" => {
+                let language = arguments.rest();
+                if let Ok(kind) = language.parse() {
+                    Ok(Command::Language { kind })
+                } else {
+                    Err(i18n::command::Error::Usage(i18n::command::Usage::Language))
                 }
             }
             _ => Err(i18n::command::Error::NotFound),

@@ -3,10 +3,18 @@ provider:
   name: aws
   runtime: rust
   memorySize: 128
-  region: eu-west-2
+  region: ${opt:region, 'eu-west-2'}
   environment:
     BOT_TOKEN: ${ssm:/kiwiyou-bot/token/head~true}:${ssm:/kiwiyou-bot/token/body~true}
     BOT_NAME: '@kiwiyou_bot'
+    REGION: ${self:provider.region}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource:
+        - "Fn::GetAtt": [ ChatLanguageTable, Arn ]
 
 package:
   individually: true
@@ -25,3 +33,17 @@ functions:
 custom:
   rust:
     dockerTag: 0.2.6-rust-1.41.0
+
+resources:
+  Resources:
+    ChatLanguageTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ChatLanguage
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: chatId
+            AttributeType: 'N'
+        KeySchema:
+          - AttributeName: chatId
+            KeyType: HASH

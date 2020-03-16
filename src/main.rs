@@ -6,6 +6,7 @@ use teloxide::{error_handlers::OnError, types::Update, types::UpdateKind, Bot};
 use tokio::runtime::Runtime;
 
 mod command;
+mod database;
 mod i18n;
 mod service;
 mod util;
@@ -13,6 +14,11 @@ mod util;
 thread_local! {
     static RUNTIME: RefCell<Runtime> =
         RefCell::new(Runtime::new().expect("unable to create runtime."));
+}
+
+pub struct MessageContext {
+    pub bot: Arc<Bot>,
+    pub language: Option<i18n::LanguageKind>,
 }
 
 fn main() {
@@ -33,7 +39,12 @@ fn handler(request: Request, _: Context) -> Result<impl IntoResponse, HandlerErr
 
 async fn run(bot: Arc<Bot>, update: Update) {
     if let UpdateKind::Message(message) = update.kind {
-        command::handle_message(bot, message)
+        let language = database::get_language(message.chat_id()).await;
+        let context = MessageContext {
+            bot,
+            language: language.unwrap_or(None),
+        };
+        command::handle_message(message, context)
             .await
             .log_on_error()
             .await;
