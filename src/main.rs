@@ -14,23 +14,18 @@ fn main() {
     lambda!(handler)
 }
 
-fn handler(
-    request: Request,
-    _: Context,
-) -> Result<impl IntoResponse, HandlerError> {
+fn handler(request: Request, _: Context) -> Result<impl IntoResponse, HandlerError> {
     let token = std::env::var("BOT_TOKEN").expect("BOT_TOKEN is not set.");
-    if request.uri().path().ends_with(&token) {
-        let bot = Bot::new(token);
-        let update: Update = serde_json::from_slice(request.body())?;
-        let task = run(bot, update);
-        RUNTIME.with(|rt| rt.borrow_mut().block_on(task))?;
-        Ok(json! ({
-            "statusCode": 200
-        }))
-    } else {
-        Ok(json! ({
-            "statusCode": 403
-        }))
+    let bot = Bot::new(token);
+    let update: Update = serde_json::from_slice(request.body())?;
+    let task = run(bot, update);
+    RUNTIME.with(|rt| rt.borrow_mut().block_on(task));
+    Ok(json! ({
+        "statusCode": 200
+    }))
+}
+
+async fn run(_bot: Arc<Bot>, _update: Update) {
     }
 }
 

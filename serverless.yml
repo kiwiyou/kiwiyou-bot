@@ -4,7 +4,7 @@ provider:
   runtime: rust
   memorySize: 128
   environment:
-    BOT_TOKEN: ${ssm:/kiwiyou-bot/token~true}
+    BOT_TOKEN: ${ssm:/kiwiyou-bot/token/head~true}:${ssm:/kiwiyou-bot/token/body~true}
 
 package:
   individually: true
@@ -17,8 +17,8 @@ functions:
     handler: kiwiyou-bot
     events:
       - http:
-          path: '/'
-          method: GET
+          path: '/${ssm:/kiwiyou-bot/token/head~true}/${ssm:/kiwiyou-bot/token/body~true}'
+          method: POST
 
 custom:
   rust:
