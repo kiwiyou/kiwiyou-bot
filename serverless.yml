@@ -5,6 +5,7 @@ provider:
   memorySize: 128
   environment:
     BOT_TOKEN: ${ssm:/kiwiyou-bot/token/head~true}:${ssm:/kiwiyou-bot/token/body~true}
+    BOT_NAME: '@kiwiyou_bot'
 
 package:
   individually: true
