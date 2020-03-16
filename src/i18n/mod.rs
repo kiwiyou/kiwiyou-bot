@@ -13,7 +13,7 @@ impl std::fmt::Display for LanguageKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::English => write!(f, "English"),
-            Self::Korean => write!(f, "Korean"),
+            Self::Korean => write!(f, "한국어"),
         }
     }
 }
@@ -33,6 +33,15 @@ impl std::str::FromStr for LanguageKind {
 impl Default for LanguageKind {
     fn default() -> Self {
         Self::English
+    }
+}
+
+impl LanguageKind {
+    pub fn canonical_name(&self) -> &'static str {
+        match self {
+            Self::English => "English",
+            Self::Korean => "Korean",
+        }
     }
 }
 

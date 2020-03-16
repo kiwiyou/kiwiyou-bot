@@ -61,7 +61,7 @@ pub async fn set_language(
             item_map.insert(
                 "language".into(),
                 AttributeValue {
-                    s: Some(language.to_string()),
+                    s: Some(language.canonical_name().into()),
                     ..Default::default()
                 },
             );
