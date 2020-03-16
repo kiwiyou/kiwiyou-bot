@@ -1,15 +1,19 @@
 mod english;
+mod korean;
 pub use english::*;
+pub use korean::*;
 
 #[derive(Debug, Clone, Copy)]
 pub enum LanguageKind {
     English,
+    Korean,
 }
 
 impl std::fmt::Display for LanguageKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::English => write!(f, "English"),
+            Self::Korean => write!(f, "Korean"),
         }
     }
 }
@@ -18,8 +22,9 @@ impl std::str::FromStr for LanguageKind {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "English" => Ok(Self::English),
+        match s.to_lowercase().as_ref() {
+            "english" => Ok(Self::English),
+            "korean" => Ok(Self::Korean),
             _ => Err(()),
         }
     }
@@ -37,11 +42,12 @@ pub trait Text<T> {
 
 impl<T> Text<LanguageKind> for T
 where
-    T: Text<English>,
+    T: Text<English> + Text<Korean>,
 {
     fn to(&self, language: LanguageKind) -> String {
         match language {
             LanguageKind::English => self.to(English),
+            LanguageKind::Korean => self.to(Korean),
         }
     }
 }

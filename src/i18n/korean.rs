@@ -2,27 +2,27 @@ use super::{command, Text};
 use crate::service::unicode::LookupResult;
 use teloxide::utils::html::{bold, code_inline, escape, italic};
 
-pub struct English;
+pub struct Korean;
 
-impl Text<English> for command::Result {
-    fn to(&self, _: English) -> String {
+impl Text<Korean> for command::Result {
+    fn to(&self, _: Korean) -> String {
         match self {
             command::Result::Help => format!(
                 "👉 {title} \n\
-                    {help} displays this help message. \n\
-                    {usearch} searches for the unicode character. \n\
-                    {language} changes the bot's language.",
-                title = bold("Usage"),
+                    {help} - 도움말을 봅니다. \n\
+                    {usearch} - 유니코드 상에서 문자를 검색합니다. \n\
+                    {language} - 봇의 언어를 변경합니다.",
+                title = bold("사용법"),
                 help = code_inline("/help"),
                 usearch = code_inline("/usearch"),
                 language = code_inline("/lang"),
             ),
             command::Result::Language { before, after } => {
-                let before_text = before.map_or("(None)".into(), |k| k.to_string());
+                let before_text = before.map_or("(미설정)".into(), |k| k.to_string());
                 format!(
-                    "Language for this chat has changed! \n\
-                    Before: {before} \n\
-                    After: {after}",
+                    "언어를 변경했습니다! \n\
+                    전: {before} \n\
+                    후: {after}",
                     before = before_text,
                     after = bold(&after.to_string()),
                 )
@@ -57,7 +57,7 @@ impl Text<English> for command::Result {
                 format!(
                     "☑️ {title} \n\n\
                     {result}",
-                    title = bold("Results"),
+                    title = bold("검색 결과"),
                     result = records.join("\n")
                 )
             }
@@ -65,36 +65,36 @@ impl Text<English> for command::Result {
     }
 }
 
-impl Text<English> for command::Error {
-    fn to(&self, language: English) -> String {
+impl Text<Korean> for command::Error {
+    fn to(&self, language: Korean) -> String {
         match self {
             command::Error::NotFound => command::Result::Help.to(language),
             command::Error::Usage(usage) => usage.to(language),
-            command::Error::Exception => "An error occurred to the bot. Try again later.".into(),
+            command::Error::Exception => "오류가 발생했습니다. 나중에 다시 시도해 주세요.".into(),
         }
     }
 }
 
-impl Text<English> for command::Usage {
-    fn to(&self, _: English) -> String {
+impl Text<Korean> for command::Usage {
+    fn to(&self, _: Korean) -> String {
         match self {
             command::Usage::UnicodeSearch => format!(
-                "👉 Usage of {command} \n\
+                "👉 {command} 사용법 \n\
                     {full_command} \n\
-                    searches for the unicode character whose name contains keyword {keyword}.",
+                    이름에 {keyword}가 포함된 유니코드 문자를 검색합니다.",
                 command = code_inline("/usearch"),
-                full_command = code_inline("/usearch <keyword>"),
-                keyword = italic(&escape("<keyword>")),
+                full_command = code_inline("/usearch <검색어>"),
+                keyword = escape("<검색어>"),
             ),
             command::Usage::Language => format!(
-                "👉 Usage of {command} \n\
+                "👉 {command} 사용법 \n\
                     {full_command} \n\
-                    changes the bot's language in this chat to {language}. \n\
+                    봇의 언어를 {language}로 설정합니다. \n\
                     {supported}",
                 command = code_inline("/lang"),
-                full_command = code_inline("/lang <language>"),
-                language = italic(&escape("<language>")),
-                supported = italic("Currently supports: English, Korean"),
+                full_command = code_inline("/lang <언어>"),
+                language = italic(&escape("<언어>")),
+                supported = italic("현재 지원하는 언어: English, Korean"),
             ),
         }
     }
