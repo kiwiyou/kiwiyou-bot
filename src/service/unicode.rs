@@ -39,7 +39,11 @@ pub async fn lookup(query: &str) -> Result<LookupResult, surf::Exception> {
     ))
     .recv_string()
     .await?;
-    UnicodeList::from_html(&html)
+    let mut unicode_list = UnicodeList::from_html(&html);
+    if let Ok(unicode_list) = unicode_list.as_mut() {
+        unicode_list.characters.truncate(50);
+    }
+    unicode_list
         .map(LookupResult::List)
         .or_else(|_| UnicodeSingle::from_html(&html).map(LookupResult::Single))
         .map_err(|_| format!("Error parsing result for query={:?}", query).into())
