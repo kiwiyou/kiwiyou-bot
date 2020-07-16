@@ -8,7 +8,7 @@ publish = false
 lambda_http = "0.1"
 lambda_runtime = "0.2"
 lazy_static = "1.4.0"
-log = "0.4.8"
+log = "0.4.11"
 pretty_env_logger = "0.4.0"
 rusoto_core = { version = "0.43.0", default-features = false }
 rusoto_dynamodb = "0.43.0"
