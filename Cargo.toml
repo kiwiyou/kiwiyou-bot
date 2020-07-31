@@ -14,7 +14,7 @@ rusoto_core = { version = "0.43.0", default-features = false }
 rusoto_dynamodb = "0.43.0"
 serde_json = "1.0"
 surf = "2.0.0-alpha.0"
-teloxide = "0.2"
+teloxide = "0.3"
 tokio = "0.2"
 unhtml = "0.7.5"
 unhtml_derive = "0.7.5"
